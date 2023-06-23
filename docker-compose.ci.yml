@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  backend:
+    image: "jetfork-expertise-backend:latest"
+
+  frontend:
+    image: "jetfork-expertise-frontend:latest"
