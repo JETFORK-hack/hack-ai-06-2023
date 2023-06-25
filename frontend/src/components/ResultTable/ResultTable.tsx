@@ -84,7 +84,7 @@ const columns = [
         title: 'Эталонная сущность',
         dataIndex: 'golden_name',
         key: 'golden_name',
-        render(text: string, record: RemarkWithFileName) {
+        render(text: string) {
             // return <ReactDiffViewer oldValue={record.receivedName} newValue={record.recognizedName} splitView={false} />
             return <div dangerouslySetInnerHTML={{ __html: text }} />
         }

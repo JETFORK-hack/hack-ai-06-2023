@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres:12
     restart: always
+    ports:
+      - "5432:5432"
     env_file:
       - .env
     healthcheck:
@@ -27,6 +29,53 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      MINIO_ACCESS_KEY: "occTeNWx8MRzL1cUhWE1"
+      MINIO_SECRET_KEY: "hMF5jcgl1iC2gIaLE4bc5uqYcM2h9YEXmnMlHpjD"
+    env_file:
+      - .env
+    volumes:
+      - ./app-minio-data:/data
+    command: server /data --console-address ":9090"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 3
+
+  redis:
+    image: 'redis:6.0-alpine'
+    ports:
+      - 6379:6379
+
+  worker:
+    build:
+      context: backend
+    command: celery --app app.celery_app worker --loglevel=info
+    env_file: .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./backend:/app:delegated
+    depends_on:
+      - postgres
+      - redis
+      - minio
 
   frontend:
     build:
