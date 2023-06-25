@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import * as diff from "diff";
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { CSVDownload, CSVLink } from "react-csv";
+import { CSVLink } from "react-csv";
 import { basePath } from '../../providers/env';
 import { CheckCircleTwoTone, CloseCircleFilled, CloseCircleTwoTone, LoadingOutlined, SettingFilled } from '@ant-design/icons';
 
@@ -111,7 +111,7 @@ export const ResultTable = () => {
             dataIndex: 'file_name',
             key: 'file_name',
             filterSearch: true,
-            onFilter: (value: string, record: RemarkWithFileName) => record.file_name.startsWith(value),
+            // onFilter: (value: string, record: RemarkWithFileName) => record.file_name.startsWith(value),
         },
         {
             title: 'Номер страницы',
@@ -177,22 +177,22 @@ export const ResultTable = () => {
                         <CheckCircleTwoTone twoToneColor="#52c41a" />
                         : <CloseCircleTwoTone twoToneColor="#eb2f96" />
             ),
-            filters: [
-                {
-                    text: 'Только верные',
-                    value: true,
-                },
-                {
-                    text: 'Только ошибочные',
-                    value: false,
-                },
-                {
-                    text: 'Не отмеченные',
-                    value: null,
-                },
-            ],
-            filterSearch: true,
-            onFilter: (value: boolean, record: RemarkWithFileName) => value === null ? record.is_correct === undefined : record.is_correct === value,
+            // filters: [
+            //     {
+            //         text: 'Только верные',
+            //         value: true,
+            //     },
+            //     {
+            //         text: 'Только ошибочные',
+            //         value: false,
+            //     },
+            //     {
+            //         text: 'Не отмеченные',
+            //         value: null,
+            //     },
+            // ],
+            // filterSearch: true,
+            // onFilter: (value: boolean, record: RemarkWithFileName) => value === null ? record.is_correct === undefined : record.is_correct === value,
         },
     ];
 
@@ -260,7 +260,7 @@ export const ResultTable = () => {
                     Пожалуйста, подождите, пока заявка будет обработана. Это может занять некоторое время.
                     <br />Страница будет обновлена автоматически.</p>}
             />
-                <Progress percent={progress ? (progress.done / progress.total * 100).toFixed(2) : 0}
+                <Progress percent={progress ? Math.round(progress.done / progress.total * 100) : 0}
                     status="active" strokeColor={{ from: '#108ee9', to: '#87d068' }} />
             </>}
 
