@@ -10,3 +10,4 @@ class RemarkWithFileName(BaseModel):
     targets: str
     candidate: str
     probability: float
+    similarity: float

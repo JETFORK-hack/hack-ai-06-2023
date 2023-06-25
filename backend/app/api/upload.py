@@ -1,7 +1,6 @@
 import os
 import io
 
-from pydantic import Field
 from app.celery_app import app as celery_app
 from app.models.files import File
 from app.deps.minio import MinioClient
@@ -193,6 +192,7 @@ async def get_result(bulk_id: str, session: AsyncSession = Depends(get_async_ses
                 targets=remark.targets,
                 candidate=remark.candidate,
                 probability=remark.probability,
+                similarity=remark.similarity,
             )
             for file_name, remark in result.all()
         ]

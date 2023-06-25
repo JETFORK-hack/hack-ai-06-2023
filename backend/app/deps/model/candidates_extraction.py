@@ -5,7 +5,6 @@ import rapidfuzz
 from unicodedata import normalize, category
 
 from app.deps.model.symbols import SLASHES, DASHES, PLUSES, QUOTES
-from app.deps.model.golden_name_extraction import _broken_hyphen
 
 # поправить пунктуацию
 char2idx_1 = re.compile(r"й")
@@ -15,6 +14,11 @@ idx2char_2 = re.compile(r"<p>98</p>")
 
 trash_punct = re.compile(f"[(),№;<>%‰*{''.join(QUOTES)}]+")
 double_space = re.compile(r"\s+")
+broken_hyphen_re = re.compile(r"(?<=[a-zа-я])- (?=[a-zа-я])")
+
+
+def _broken_hyphen(text: str) -> str:
+    return broken_hyphen_re.sub("", text)
 
 
 def remove_accents(text: str) -> str:

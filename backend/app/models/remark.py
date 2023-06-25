@@ -24,6 +24,7 @@ class Remark(Base):
     targets: Mapped[str | None]
     candidate: Mapped[str | None]
     probability: Mapped[float | None]
+    similarity: Mapped[float | None]
 
     created: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

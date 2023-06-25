@@ -47,6 +47,7 @@ interface RemarkWithFileName {
     targets: string;
     candidate: string;
     probability: number;
+    similarity: number;
 }
 
 type Response = {
@@ -108,6 +109,14 @@ const columns = [
         key: 'probability',
         render: (text: string, record: RemarkWithFileName) => {
             return record.probability.toFixed(4);
+        }
+    },
+    {
+        title: 'Похожесть',
+        dataIndex: 'similarity',
+        key: 'similarity',
+        render: (text: string, record: RemarkWithFileName) => {
+            return record.similarity.toFixed(2);
         }
     },
 ];
@@ -175,6 +184,7 @@ export const ResultTable = () => {
                 <Progress percent={progress ? progress.done / progress.total * 100 : 0}
                     status="active" strokeColor={{ from: '#108ee9', to: '#87d068' }} />
             </>}
+
             {status === 'PENDING' &&
                 <Alert
                     type="warning" showIcon icon={<LoadingOutlined spin />}
@@ -183,7 +193,10 @@ export const ResultTable = () => {
                         Пожалуйста, подождите, пока заявка будет обработана. Это может занять некоторое время.
                         <br />Страница будет обновлена автоматически.</p>}
                 />}
-            {status === 'SUCCESS' && <Table dataSource={data} columns={columns} loading={isLoading} />}
+
+            {status === 'SUCCESS' &&
+                <Table dataSource={data} columns={columns} loading={isLoading} pagination={{ pageSize: 15 }} />}
+
             {status === 'FAILURE' && <Alert
                 type="error" showIcon icon={<CloseCircleFilled />}
                 message="Заявка не обработана"

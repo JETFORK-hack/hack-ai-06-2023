@@ -1,7 +1,7 @@
 import re
 from typing import Union
+from app.deps.model.candidates_extraction import _broken_hyphen
 
-broken_hyphen_re = re.compile(r"(?<=[a-zа-я])- (?=[a-zа-я])")
 
 CLOSINGS = ['материалы инженерных изысканий',
             'технический отч[ёе]т',
@@ -20,10 +20,6 @@ closing_re = re.compile(
     r"([\S\s]+)((?<=\n\n)(?:{}))".format("|".join(CLOSINGS)), re.IGNORECASE)
 opening_re = re.compile(
     r"((?<=\n\n)(?:{}))([\S\s]+)".format("|".join(OPENINGS)), re.IGNORECASE)
-
-
-def _broken_hyphen(text: str) -> str:
-    return broken_hyphen_re.sub("", text)
 
 
 def _filter_matches(match_: str) -> Union[str, None]:
@@ -52,12 +48,11 @@ def find_golden_name(documents: dict):
             for page_num, content in parsed_content.items():
                 if page_num < 2:
                     res = extract_main_name_candidate(content["text"])
-                    if len(res) > 0:
+                    if (len(res) > 0) and (_filter_matches(res)):
                         main_names[document_name] = _filter_matches(res)
                         break
 
-    targets = list(set(main_names.values()))
-    if len(targets) > 0:
-        golden_name = targets[0]
+    names = list(main_names.values())
+    golden_name = max(names, key=names.count)
 
     return golden_name

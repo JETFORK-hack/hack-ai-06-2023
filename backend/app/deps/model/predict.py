@@ -3,14 +3,28 @@ import joblib
 from app.deps.model.golden_name_extraction import find_golden_name
 from app.deps.model.candidates_extraction import get_candidates
 from app.deps.model.feature_generation import generate_features
+from app.deps.model.symbols import QUOTES
 
 dropcols = ["golden_name", "doc_name", "page_num", "candidate", "targets"]
 
 
-def get_raw_candidate(page: str, candidate: str) -> str:
-    res = re.findall(f'{candidate[:7]}.*{candidate[-7:]}', page, re.IGNORECASE)
-    if res:
-        return res[0]
+def get_raw_candidate(page: str, gold: str, candidate: str) -> str:
+    if gold[0] in QUOTES:
+        gold = gold[1:]
+    if gold[-1] in ['.', ',']:
+        gold = gold[:-1]
+    if gold[-1] in QUOTES:
+        gold = gold[:-1]
+
+    res_gold = re.findall(f'{gold[:7]}.*{gold[-7:]}', page, re.IGNORECASE)
+    if res_gold:
+        return res_gold[0]
+
+    res_cand = re.findall(
+        f'{candidate[:7]}.*{candidate[-7:]}', page, re.IGNORECASE)
+    if res_cand:
+        return res_cand[0]
+
     return candidate
 
 
@@ -40,7 +54,11 @@ def predict(all_documents: dict, golden_name: str = ''):
             .sort_values(["page_num"])
         final_entities['candidate'] = final_entities.apply(lambda x:
                                                            get_raw_candidate(all_documents[x['doc_name']][x['page_num']-1]['text'],
+                                                                             x['golden_name'],
                                                                              x['candidate']), axis=1)
-        return final_entities[["doc_name", "page_num", "golden_name", "targets", "candidate", "probability"]]
+        final_entities["similarity"] = final_entities \
+            .apply(lambda x: len(set(x["candidate"].lower()) & set(x["golden_name"].lower())) / len(set(x["candidate"].lower() + x["golden_name"].lower())), axis=1) \
+            .astype(float)
+        return final_entities[["doc_name", "page_num", "golden_name", "targets", "candidate", "probability", "similarity"]]
 
     return None
