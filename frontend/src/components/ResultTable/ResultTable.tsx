@@ -1,10 +1,11 @@
-import { Alert, Progress, Table, Typography, message } from 'antd';
+import { Alert, Button, Progress, Space, Table, Tooltip, Typography, message } from 'antd';
 import { useParams } from 'react-router-dom';
 import * as diff from "diff";
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { CSVDownload, CSVLink } from "react-csv";
 import { basePath } from '../../providers/env';
-import { CloseCircleFilled, LoadingOutlined, SettingFilled } from '@ant-design/icons';
+import { CheckCircleTwoTone, CloseCircleFilled, CloseCircleTwoTone, LoadingOutlined, SettingFilled } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -48,6 +49,7 @@ interface RemarkWithFileName {
     candidate: string;
     probability: number;
     similarity: number;
+    is_correct?: boolean;
 }
 
 type Response = {
@@ -70,56 +72,6 @@ type Response = {
     }
 }
 
-const columns = [
-    {
-        title: 'Название файла',
-        dataIndex: 'file_name',
-        key: 'file_name',
-    },
-    {
-        title: 'Номер страницы',
-        dataIndex: 'page_num',
-        key: 'page_num',
-    },
-    {
-        title: 'Эталонная сущность',
-        dataIndex: 'golden_name',
-        key: 'golden_name',
-        render(text: string) {
-            // return <ReactDiffViewer oldValue={record.receivedName} newValue={record.recognizedName} splitView={false} />
-            return <div dangerouslySetInnerHTML={{ __html: text }} />
-        }
-    },
-    {
-        title: 'Распознанное наименование объекта',
-        dataIndex: 'candidate',
-        key: 'candidate'
-    },
-    {
-        title: 'Совпадения по тексту документа',
-        dataIndex: 'candidate',
-        key: 'diff',
-        render: (text: string, record: RemarkWithFileName) => {
-            return DiffColor({ string1: record.candidate, string2: record.golden_name },);
-        }
-    },
-    {
-        title: 'Уверенность в совпадении',
-        dataIndex: 'probability',
-        key: 'probability',
-        render: (text: string, record: RemarkWithFileName) => {
-            return record.probability.toFixed(4);
-        }
-    },
-    {
-        title: 'Похожесть',
-        dataIndex: 'similarity',
-        key: 'similarity',
-        render: (text: string, record: RemarkWithFileName) => {
-            return record.similarity.toFixed(2);
-        }
-    },
-];
 
 export const ResultTable = () => {
     const { id } = useParams();
@@ -128,8 +80,93 @@ export const ResultTable = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState<{ done: number, total: number, } | null>(null);
     const [errMessage, setErrMessage] = useState<string | null>(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     const timer = useRef<number | null>(null); // we can save timer in useRef and pass it to child
+
+
+    const selectedRows = data.filter((item) => selectedRowKeys.includes(item.id));
+
+    const setFeedback = (id: number, is_correct: boolean) => {
+        const newData = data.map((item) => {
+            if (item.id === id) {
+                return { ...item, is_correct };
+            }
+            return item;
+        });
+        setData(newData);
+    }
+
+    const columns = [
+        {
+            title: 'Название файла',
+            dataIndex: 'file_name',
+            key: 'file_name',
+        },
+        {
+            title: 'Номер страницы',
+            dataIndex: 'page_num',
+            key: 'page_num',
+        },
+        {
+            title: 'Эталонная сущность',
+            dataIndex: 'golden_name',
+            key: 'golden_name',
+            render(text: string) {
+                // return <ReactDiffViewer oldValue={record.receivedName} newValue={record.recognizedName} splitView={false} />
+                return <div dangerouslySetInnerHTML={{ __html: text }} />
+            }
+        },
+        {
+            title: 'Распознанное наименование объекта',
+            dataIndex: 'candidate',
+            key: 'candidate'
+        },
+        {
+            title: 'Совпадения по тексту документа',
+            dataIndex: 'candidate',
+            key: 'diff',
+            render: (text: string, record: RemarkWithFileName) => {
+                return DiffColor({ string1: record.candidate, string2: record.golden_name },);
+            }
+        },
+        {
+            title: 'Уверенность в совпадении',
+            dataIndex: 'probability',
+            key: 'probability',
+            render: (text: string, record: RemarkWithFileName) => {
+                return record.probability.toFixed(4);
+            }
+        },
+        {
+            title: 'Похожесть',
+            dataIndex: 'similarity',
+            key: 'similarity',
+            render: (text: string, record: RemarkWithFileName) => {
+                return record.similarity.toFixed(2);
+            }
+        },
+        {
+            title: 'Действия',
+            key: 'action',
+            render: (_: any, record: RemarkWithFileName) => (
+                record.is_correct === undefined ?
+                    <Space size="middle"
+                        align='center'>
+                        <Tooltip title="Отметить как верный">
+                            <Button icon={<CheckCircleTwoTone twoToneColor="#52c41a" />} onClick={() => setFeedback(record.id, true)} />
+                        </Tooltip>
+                        <Tooltip title="Отметить как ошибочный">
+                            <Button icon={<CloseCircleTwoTone twoToneColor="#eb2f96" />} onClick={() => setFeedback(record.id, false)} />
+                        </Tooltip>
+                    </Space>
+                    : record.is_correct ?
+                        <CheckCircleTwoTone twoToneColor="#52c41a" />
+                        : <CloseCircleTwoTone twoToneColor="#eb2f96" />
+            ),
+        },
+    ];
+
 
     useEffect(() => {
         timer.current = setInterval(() => getData(), delay * 1000);
@@ -146,6 +183,7 @@ export const ResultTable = () => {
                 clearInterval(timer.current || undefined);
                 if (response.data.status === 'SUCCESS') {
                     setData(response.data.result);
+                    setSelectedRowKeys([]);
                 }
                 setIsLoading(false);
                 setStatus(response.data.status);
@@ -171,6 +209,18 @@ export const ResultTable = () => {
         getData();
     }, [id]);
 
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
+    const hasSelected = selectedRowKeys.length > 0;
+
     return (
         <>
             <Title>Результаты проверки</Title>
@@ -195,7 +245,20 @@ export const ResultTable = () => {
                 />}
 
             {status === 'SUCCESS' &&
-                <Table dataSource={data} columns={columns} loading={isLoading} pagination={{ pageSize: 15 }} />}
+                <div>
+                    <div style={{ marginBottom: 16 }}>
+                        <Button type="primary" onClick={() => console.log('clicked')} disabled={!hasSelected} loading={isLoading}>
+                            <CSVLink data={selectedRows} filename={"jetfork_export.csv"}>Выгрузить результаты</CSVLink>
+                        </Button>
+                        {/* <CSVDownload data={selectedRows} target="_blank" /> */}
+
+                        <span style={{ marginLeft: 8 }}>
+                            {hasSelected ? `Выделено ${selectedRowKeys.length}` : ''}
+                        </span>
+                    </div>
+                    <Table dataSource={data} columns={columns} loading={isLoading} pagination={{ pageSize: 15 }} rowSelection={rowSelection} rowKey='id' />
+                </div>}
+
 
             {status === 'FAILURE' && <Alert
                 type="error" showIcon icon={<CloseCircleFilled />}

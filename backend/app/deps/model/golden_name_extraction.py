@@ -44,13 +44,14 @@ def find_golden_name(documents: dict):
     golden_name = None
 
     for document_name, parsed_content in documents.items():
-        if type(parsed_content) != str:
-            for page_num, content in parsed_content.items():
-                if page_num < 2:
-                    res = extract_main_name_candidate(content["text"])
-                    if (len(res) > 0) and (_filter_matches(res)):
-                        main_names[document_name] = _filter_matches(res)
-                        break
+        if type(parsed_content) == str:
+            return golden_name
+        for page_num, content in parsed_content.items():
+            if page_num < 2:
+                res = extract_main_name_candidate(content["text"])
+                if (len(res) > 0) and (_filter_matches(res)):
+                    main_names[document_name] = _filter_matches(res)
+                    break
 
     names = list(main_names.values())
     golden_name = max(names, key=names.count)
