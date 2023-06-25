@@ -1,6 +1,8 @@
 import os
 import io
 
+from IPython import embed
+
 from app.celery_app import app as celery_app
 from app.models.files import File
 from app.deps.minio import MinioClient
@@ -199,4 +201,23 @@ async def get_result(bulk_id: str, session: AsyncSession = Depends(get_async_ses
 
         return {"status": bundle.status, "result": remarks_with_names}
     except exc.SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch('/remark/{remark_id}')
+async def feedback(remark_id: int,
+                   is_correct: bool | None = Body(embed=True,
+                                                  default=None, title="Правильность результата"),
+                   session: AsyncSession = Depends(get_async_session)):
+    try:
+        remark = await session.get(Remark, remark_id)
+        if not remark:
+            raise HTTPException(
+                status_code=404, detail="Результат не найден")
+        remark.is_correct = is_correct
+        session.add(remark)
+        await session.commit()
+        return {"status": "ok", 'id': remark_id, 'is_correct': is_correct}
+    except exc.SQLAlchemyError as e:
+        await session.rollback()
         raise HTTPException(status_code=500, detail=str(e))

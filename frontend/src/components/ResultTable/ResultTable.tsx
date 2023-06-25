@@ -95,6 +95,14 @@ export const ResultTable = () => {
             return item;
         });
         setData(newData);
+        axios.patch(`${basePath}/api/v1/upload/remark/${id}`, { is_correct })
+            .then((response) => {
+                console.log(response);
+            }
+            ).catch((error) => {
+                console.log(error);
+            });
+
     }
 
     const columns = [
