@@ -1,8 +1,6 @@
 import os
 import io
 
-from IPython import embed
-
 from app.celery_app import app as celery_app
 from app.models.files import File
 from app.deps.minio import MinioClient

@@ -21,6 +21,7 @@ def matching_numbers(external_name, internal_name):
 
 
 def generate_features(df: pd.DataFrame) -> pd.DataFrame:
+
     logger.info("calculate editions")
     df["qratio"] = df \
         .apply(lambda x: rapidfuzz.fuzz.QRatio(x["candidate"],
@@ -39,6 +40,13 @@ def generate_features(df: pd.DataFrame) -> pd.DataFrame:
         .apply(lambda x: textdistance.jaro_winkler(x["candidate"],
                                                    x["targets"]), axis=1) \
         .astype(float)
+
+    print('df.columns', df.columns)
+    print('df.columns2', df.apply(lambda x: textdistance.levenshtein(x["candidate"],
+                                                                     x["targets"]) / len(x["candidate"]), axis=1)
+          )
+    print(df.head(25))
+
     df["levenshtein"] = df \
         .apply(lambda x: textdistance.levenshtein(x["candidate"],
                                                   x["targets"]) / len(x["candidate"]), axis=1) \

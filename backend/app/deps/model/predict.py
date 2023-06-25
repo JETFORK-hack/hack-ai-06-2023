@@ -38,6 +38,14 @@ def predict(all_documents: dict, golden_name: str = ''):
         candidates = get_candidates(all_documents, golden_name)
         candidates = candidates.drop_duplicates(
             ['golden_name', 'doc_name', 'page_num', 'candidate'])
+
+        print('golden_name', golden_name)
+        print('candidates.columns', candidates.columns)
+        print('candidates.isna().sum()', candidates.isna().sum())
+        print('candidates.shape', candidates.shape[0])
+        if candidates.empty:
+            return None
+
         candidates_featured = generate_features(candidates)
         candidates_featured['probability'] = classifier.predict_proba(
             candidates_featured.drop(dropcols, axis=1))[:, 1]
@@ -46,18 +54,19 @@ def predict(all_documents: dict, golden_name: str = ''):
                                 == candidates_featured["candidate"], "probability"] = 1.
         final_entities = candidates_featured[(
             candidates_featured['probability'] > best_threshold)]
-        final_entities = final_entities.sort_values('probability', ascending=False)\
-            .groupby(["doc_name", "page_num", "golden_name", "targets"], sort=False) \
+        final_entities = final_entities.sort_values(
+            'probability', ascending=False)\
+            .groupby(["doc_name", "page_num", "golden_name", "targets"], sort=False)\
             .agg({"candidate": "first",
-                  "probability": max}) \
-            .reset_index() \
+                  "probability": max})\
+            .reset_index()\
             .sort_values(["page_num"])
         final_entities['candidate'] = final_entities.apply(lambda x:
                                                            get_raw_candidate(all_documents[x['doc_name']][x['page_num']-1]['text'],
                                                                              x['golden_name'],
                                                                              x['candidate']), axis=1)
-        final_entities["similarity"] = final_entities \
-            .apply(lambda x: len(set(x["candidate"].lower()) & set(x["golden_name"].lower())) / len(set(x["candidate"].lower() + x["golden_name"].lower())), axis=1) \
+        final_entities["similarity"] = final_entities\
+            .apply(lambda x: len(set(x["candidate"].lower()) & set(x["golden_name"].lower())) / len(set(x["candidate"].lower() + x["golden_name"].lower())), axis=1)\
             .astype(float)
         return final_entities[["doc_name", "page_num", "golden_name", "targets", "candidate", "probability", "similarity"]]
 

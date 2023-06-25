@@ -28,7 +28,9 @@ export default function Header() {
     return (
         <Layout>
             <Layout.Header style={{ display: 'flex', alignItems: 'center' }}>
-                <img src={jetforkLogo} style={{ height: '100%', paddingRight: 50 }} onClick={() => navigate('/')} />
+                <a href='/' rel="noreferrer" style={{ height: '100%' }}>
+                    <img src={jetforkLogo} style={{ height: '100%', paddingRight: 50 }} />
+                </a>
                 <Menu theme="dark" mode="horizontal" items={items}
                     defaultSelectedKeys={['1']} />
             </Layout.Header>

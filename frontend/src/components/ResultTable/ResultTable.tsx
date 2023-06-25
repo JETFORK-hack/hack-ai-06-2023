@@ -110,11 +110,14 @@ export const ResultTable = () => {
             title: 'Название файла',
             dataIndex: 'file_name',
             key: 'file_name',
+            filterSearch: true,
+            onFilter: (value: string, record: RemarkWithFileName) => record.file_name.startsWith(value),
         },
         {
             title: 'Номер страницы',
             dataIndex: 'page_num',
             key: 'page_num',
+            sorter: (a: RemarkWithFileName, b: RemarkWithFileName) => a.page_num - b.page_num,
         },
         {
             title: 'Эталонная сущность',
@@ -144,7 +147,8 @@ export const ResultTable = () => {
             key: 'probability',
             render: (text: string, record: RemarkWithFileName) => {
                 return record.probability.toFixed(4);
-            }
+            },
+            sorter: (a: RemarkWithFileName, b: RemarkWithFileName) => a.probability - b.probability,
         },
         {
             title: 'Похожесть',
@@ -152,7 +156,8 @@ export const ResultTable = () => {
             key: 'similarity',
             render: (text: string, record: RemarkWithFileName) => {
                 return record.similarity.toFixed(2);
-            }
+            },
+            sorter: (a: RemarkWithFileName, b: RemarkWithFileName) => a.similarity - b.similarity,
         },
         {
             title: 'Действия',
@@ -172,6 +177,22 @@ export const ResultTable = () => {
                         <CheckCircleTwoTone twoToneColor="#52c41a" />
                         : <CloseCircleTwoTone twoToneColor="#eb2f96" />
             ),
+            filters: [
+                {
+                    text: 'Только верные',
+                    value: true,
+                },
+                {
+                    text: 'Только ошибочные',
+                    value: false,
+                },
+                {
+                    text: 'Не отмеченные',
+                    value: null,
+                },
+            ],
+            filterSearch: true,
+            onFilter: (value: boolean, record: RemarkWithFileName) => value === null ? record.is_correct === undefined : record.is_correct === value,
         },
     ];
 
@@ -239,7 +260,7 @@ export const ResultTable = () => {
                     Пожалуйста, подождите, пока заявка будет обработана. Это может занять некоторое время.
                     <br />Страница будет обновлена автоматически.</p>}
             />
-                <Progress percent={progress ? progress.done / progress.total * 100 : 0}
+                <Progress percent={progress ? (progress.done / progress.total * 100).toFixed(2) : 0}
                     status="active" strokeColor={{ from: '#108ee9', to: '#87d068' }} />
             </>}
 
@@ -264,7 +285,10 @@ export const ResultTable = () => {
                             {hasSelected ? `Выделено ${selectedRowKeys.length}` : ''}
                         </span>
                     </div>
-                    <Table dataSource={data} columns={columns} loading={isLoading} pagination={{ pageSize: 15 }} rowSelection={rowSelection} rowKey='id' />
+                    <Table dataSource={data} columns={columns}
+                        loading={isLoading} pagination={{ pageSize: 15 }}
+                        scroll={{ x: true }}
+                        rowSelection={rowSelection} rowKey='id' />
                 </div>}
 
 

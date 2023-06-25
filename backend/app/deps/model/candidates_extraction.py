@@ -64,6 +64,8 @@ def get_candidates(documents: dict, golden_name: str):
         if type(parsed_content) != str:
             for page_num, context in parsed_content.items():
                 if context["text"] and len(context["text"]) > 0:
+                    if golden_name is None:
+                        print(f'document_name', document_name)
                     raw_candidates = [" ".join(ngram) for ngram in everygrams(preprocess_text(context["text"]).split(),
                                                                               min_len=int(
                                                                                   len(processed_golden_name.split())/2),

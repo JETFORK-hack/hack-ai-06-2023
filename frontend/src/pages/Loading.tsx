@@ -1,8 +1,10 @@
-import { Upload, UploadProps, message } from 'antd';
+import { Typography, Upload, UploadProps, message } from 'antd';
 import { basePath } from '../providers/env';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { Uploader } from '../components/Uploader/Uploader';
+
+const { Link } = Typography;
 
 const { Dragger } = Upload;
 
@@ -40,6 +42,13 @@ export const Loading = (): JSX.Element => {
     return (
         <>
             <h1>Проверка</h1>
+            <div style={{ textAlign: 'right' }}>
+                <Link href="https://jetfork.ru/pdfs/%D0%9A%D1%83%D0%B7%D0%B1-183267_%D0%9A%D0%A0%D0%90%D0%A1%E2%80%93%D0%98%D0%AD%D0%981_%D0%B8%D0%B7%D0%BC.6.00256-21_%D0%9A%D0%A0%D0%AD-26756.pdf" target="_blank">
+                    Скачать пробный файл
+                </Link>
+            </div>
+            <br />
+
             {/* <Dragger {...props}>
                 <p className="ant-upload-drag-icon">
                     <InboxOutlined />
