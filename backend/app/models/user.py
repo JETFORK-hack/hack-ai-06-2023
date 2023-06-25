@@ -21,7 +21,8 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     updated: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    items: Mapped["Item"] = relationship(back_populates="user", cascade="all, delete")
+    items: Mapped["Item"] = relationship(
+        back_populates="user", cascade="all, delete")
 
     def __repr__(self):
         return f"User(id={self.id!r}, name={self.email!r})"

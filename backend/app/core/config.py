@@ -18,6 +18,12 @@ class Settings(BaseSettings):
 
     # The following variables need to be defined in environment
 
+    MINIO_HOST: str
+    MINIO_PORT: int
+    MINIO_ROOT_USER: str
+    MINIO_ROOT_PASSWORD: str
+    USER_ROOT_FOLDER: str
+
     TEST_DATABASE_URL: Optional[PostgresDsn]
     DATABASE_URL: PostgresDsn
     ASYNC_DATABASE_URL: Optional[PostgresDsn]
@@ -44,6 +50,9 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     #  END: required environment variables
+
+    # class Config:
+    #     env_file = "../.env"
 
 
 settings = Settings()

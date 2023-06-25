@@ -70,13 +70,16 @@ def serve_static_app(app):
 
 def setup_cors_middleware(app):
     if settings.BACKEND_CORS_ORIGINS:
+        print("settings.BACKEND_CORS_ORIGINS", settings.BACKEND_CORS_ORIGINS)
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_origins=[str(origin)
+                           for origin in settings.BACKEND_CORS_ORIGINS],
             allow_credentials=True,
             allow_methods=["*"],
-            expose_headers=["Content-Range", "Range"],
-            allow_headers=["Authorization", "Range", "Content-Range"],
+            allow_headers=["*"],
+            # expose_headers=["Content-Range", "Range"],
+            # allow_headers=["Authorization", "Range", "Content-Range"],
         )
 
 

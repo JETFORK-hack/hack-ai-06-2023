@@ -110,3 +110,7 @@ There's a monolith/single docker image that uses FastAPI to serve static assets.
 #### Build and upload docker images to a repository
 
 Configure the [**build-push-action**](https://github.com/marketplace/actions/build-and-push-docker-images) in `.github/workflows/test.yaml`.
+
+### Model
+
+Add `artifacts.pkl` to backend/app/deps/model

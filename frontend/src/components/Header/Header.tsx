@@ -1,18 +1,8 @@
 import jetforkLogo from '../../logo_white_transporent.png';
 import { Layout, Menu, Breadcrumb, theme } from 'antd';
-import { basePath } from '../../providers/env';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 
-const items = [
-    {
-        key: '1',
-        label: 'Отправить на проверку',
-    },
-    {
-        key: '2',
-        label: 'qwe',
-    },
-]
 
 
 export default function Header() {
@@ -20,24 +10,41 @@ export default function Header() {
         token: { colorBgContainer },
     } = theme.useToken();
 
+    const navigate = useNavigate();
+
+    const items = [
+        {
+            key: '1',
+            label: 'Отправить на проверку',
+            onClick: () => navigate('/'),
+        },
+        {
+            key: '2',
+            label: 'Проверить данные',
+        },
+    ]
+
+
     return (
-        <Layout className="layout">
+        <Layout>
             <Layout.Header style={{ display: 'flex', alignItems: 'center' }}>
-                <img src={jetforkLogo} style={{ height: '100%', paddingRight: 50 }} />
+                <img src={jetforkLogo} style={{ height: '100%', paddingRight: 50 }} onClick={() => navigate('/')} />
                 <Menu theme="dark" mode="horizontal" items={items}
                     defaultSelectedKeys={['1']} />
             </Layout.Header>
-            <Layout.Content style={{ padding: '0 50px', height: '100%' }}>
-                <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item>Home</Breadcrumb.Item>
-                    <Breadcrumb.Item>List</Breadcrumb.Item>
-                    <Breadcrumb.Item>App</Breadcrumb.Item>
-                </Breadcrumb>
-                <div className="site-layout-content" style={{ background: colorBgContainer }}>
-                    Content {basePath}
-                </div>
-            </Layout.Content>
-            <Layout.Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Layout.Footer>
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Layout.Content style={{ padding: '0 50px', flex: 1, overflow: 'auto' }}>
+                    <Breadcrumb style={{ margin: '16px 0' }}>
+                        <Breadcrumb.Item>Главгосэкспертиза</Breadcrumb.Item>
+                        <Breadcrumb.Item>Проверка данных</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <div style={{ background: colorBgContainer, padding: 30, paddingInline: 100 }}>
+                        <Outlet />
+                    </div>
+                </Layout.Content>
+                <Layout.Footer style={{ textAlign: 'center' }}>JetFork</Layout.Footer>
+            </div>
         </Layout>
+
     )
 }
